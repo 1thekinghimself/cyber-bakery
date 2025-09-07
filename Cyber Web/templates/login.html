@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="login-container">
+    <h2 class="neon-glow">Admin Access Terminal</h2>
+    
+    {% if error %}
+    <div class="error-message">{{ error }}</div>
+    {% endif %}
+    
+    <form method="POST" action="{{ url_for('admin_login') }}">
+        <input type="text" name="username" placeholder="Username" class="cyber-input" required>
+        <input type="password" name="password" placeholder="Password" class="cyber-input" required>
+        <button type="submit" class="cyber-button" style="width: 100%; margin-top: 15px;">Login</button>
+    </form>
+    
+    {% if not error %}
+    <div class="credentials-info">
+        <h4>Demo Credentials:</h4>
+        <p>Username: <strong>cyberadmin</strong></p>
+        <p>Password: <strong>cyber12345</strong></p>
+        <p>Username: <strong>introvert</strong></p>
+        <p>Password: <strong>skii12345</strong></p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

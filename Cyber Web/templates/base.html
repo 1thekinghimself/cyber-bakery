@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ site_settings.site_name }}</title>
+    <style>
+        :root {
+            --neon-green: #0f0;
+            --neon-blue: #0ff;
+            --neon-pink: #f0f;
+            --dark-bg: #000;
+            --grid-color: rgba(0, 255, 0, 0.1);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        #matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                             linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .glitch {
+            position: relative;
+            animation: glitch 5s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { text-shadow: 0 0 var(--neon-green); }
+            98% { text-shadow: -2px -2px var(--neon-pink), 2px 2px var(--neon-blue); }
+            99% { text-shadow: 2px -2px var(--neon-pink), -2px 2px var(--neon-blue); }
+        }
+
+        .neon-glow {
+            text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .cyber-button {
+            background: transparent;
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .cyber-button:hover {
+            color: var(--dark-bg);
+            background: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            position: relative;
+        }
+
+        .admin-access {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-align: right;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .product-card {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 1px solid var(--neon-green);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px var(--neon-green);
+        }
+
+        .product-number {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            background: var(--dark-bg);
+            border: 1px solid var(--neon-green);
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .cyber-input {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .cyber-input:focus {
+            outline: none;
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border: 1px solid var(--neon-green);
+        }
+
+        .error-message {
+            color: #ff3333;
+            margin-bottom: 15px;
+            text-shadow: 0 0 5px #ff3333;
+        }
+
+        .credentials-info {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px solid var(--neon-blue);
+        }
+
+        .admin-panel {
+            margin-top: 30px;
+        }
+
+        .admin-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid var(--neon-blue);
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .admin-table th, .admin-table td {
+            border: 1px solid var(--neon-green);
+            padding: 8px;
+            text-align: left;
+        }
+
+        .admin-table th {
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+/* Additional styles for receipt management */
+.receipt-preview {
+    max-width: 100%;
+    max-height: 300px;
+    border: 2px solid var(--neon-green);
+    margin: 10px 0;
+}
+
+.receipt-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.stat-box {
+    background: rgba(0, 255, 0, 0.1);
+    padding: 15px;
+    border: 1px solid var(--neon-green);
+    border-radius: 5px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2em;
+    margin: 0;
+    color: var(--neon-green);
+    font-weight: bold;
+}
+
+.stat-label {
+    margin: 5px 0 0 0;
+    color: var(--neon-blue);
+}
+</style>
+    </style>
+</head>
+<body>
+    <canvas id="matrix-rain"></canvas>
+    <div class="cyber-grid"></div>
+
+    <div class="container">
+        <header>
+            <h1 class="glitch neon-glow">{{ site_settings.site_name }}</h1>
+            <p>{{ site_settings.site_description }}</p>
+
+            {% if session.admin_username %}
+            <div class="admin-access">
+                <span style="margin-right: 10px;">Admin: {{ session.admin_username }}</span>
+                <a href="{{ url_for('admin_logout') }}" class="cyber-button">Logout</a>
+            </div>
+            {% else %}
+            <div class="admin-access">
+                <a href="{{ url_for('admin_login') }}" class="cyber-button">Admin Access</a>
+            </div>
+            {% endif %}
+        </header>
+
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('matrix-rain');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$#@%&!?*';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(columns).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0F0';
+            ctx.font = `${fontSize}px monospace`;
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters[Math.floor(Math.random() * letters.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 33);
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

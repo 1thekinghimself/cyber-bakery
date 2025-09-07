@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h2 class="neon-glow">{{ product.name }}</h2>
+        <p>{{ product.description }}</p>
+        <p class="pulse" style="color: var(--neon-pink); font-size: 1.2em; font-weight: bold;">
+            {{ product.price }}
+        </p>
+    </div>
+
+    {% if sections %}
+    <div style="margin-top: 40px;">
+        <h3 class="neon-glow" style="text-align: center;">Available Packages</h3>
+        <div class="products-grid">
+            {% for section in sections %}
+            <div class="product-card">
+                <h4>{{ section.name }}</h4>
+                <p class="pulse" style="color: var(--neon-blue);">{{ section.price_range }}</p>
+                <a href="{{ url_for('payment', section_id=section.id) }}" class="cyber-button">Purchase</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div style="text-align: center; margin-top: 40px;">
+        <a href="{{ url_for('payment', section_id=0) }}" class="cyber-button" style="font-size: 1.2em;">
+            Purchase Now
+        </a>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 50px; text-align: center;">
+        <a href="{{ url_for('index') }}" class="cyber-button">← Back to Products</a>
+    </div>
+</div>
+{% endblock %}

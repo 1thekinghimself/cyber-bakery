@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="text-align: center; margin-top: 50px;">
+    <h2 class="neon-glow">Access Required</h2>
+    <p>This product requires an access code to view.</p>
+    
+    <form id="access-form" style="max-width: 400px; margin: 0 auto;">
+        <input type="hidden" name="product_id" value="{{ product.id }}">
+        <input type="text" name="access_code" placeholder="Enter Access Code" class="cyber-input" required>
+        <button type="submit" class="cyber-button">Verify Access</button>
+    </form>
+    
+    <div id="access-result" style="margin-top: 20px;"></div>
+</div>
+
+<script>
+document.getElementById('access-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const response = await fetch('/verify_access', {
+        method: 'POST',
+        body: formData
+    });
+    const result = await response.json();
+    
+    if (result.success) {
+        window.location.reload();
+    } else {
+        document.getElementById('access-result').innerHTML = 
+            `<p style="color: var(--neon-pink);">${result.error}</p>`;
+    }
+});
+</script>
+{% endblock %}

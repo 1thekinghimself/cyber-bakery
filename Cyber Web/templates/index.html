@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="neon-glow" style="text-align: center;">Our Digital Products</h2>
+<div class="products-grid">
+    {% for product in products %}
+    <div class="product-card">
+        <div class="product-number">{{ product.id }}</div>
+        <h3>{{ product.name }}</h3>
+        <p>{{ product.description }}</p>
+        <p class="pulse" style="color: var(--neon-pink);">{{ product.price }}</p>
+        {% if product.requires_access %}
+        <a href="{{ url_for('product_detail', product_id=product.id) }}" class="cyber-button">Access Required</a>
+        {% else %}
+        <a href="{{ url_for('product_detail', product_id=product.id) }}" class="cyber-button">View Product</a>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="product-card" style="grid-column: 1 / -1; text-align: center;">
+        <h3>No Products Available</h3>
+        <p>Check back later for our latest digital offerings.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

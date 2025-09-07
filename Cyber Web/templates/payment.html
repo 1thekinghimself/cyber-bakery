@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h2 class="neon-glow">Purchase {{ section.name if section else product.name }}</h2>
+        <p style="color: var(--neon-blue); font-size: 1.2em;">
+            Price: {{ section.price_range if section else product.price }}
+        </p>
+    </div>
+
+    <div style="background: rgba(0, 0, 0, 0.8); padding: 20px; border: 1px solid var(--neon-green);">
+        <h3 class="neon-glow" style="text-align: center;">Payment Instructions</h3>
+        
+        <div style="margin: 20px 0;">
+            <h4>Step 1: Send Payment</h4>
+            <p>Send the exact amount to one of our cryptocurrency wallets:</p>
+            
+            <div style="margin: 15px 0;">
+                {% for wallet in wallets %}
+                <div style="margin: 10px 0; padding: 10px; border: 1px solid var(--neon-blue);">
+                    <strong>{{ wallet.name }}:</strong>
+                    <code style="display: block; margin: 5px 0; word-break: break-all; color: var(--neon-green);">
+                        {{ wallet.address }}
+                    </code>
+                    <small>Status: {{ 'Active' if wallet.active else 'Inactive' }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <h4>Step 2: Upload Receipt</h4>
+            <form id="receipt-form" enctype="multipart/form-data">
+                <input type="hidden" name="section_id" value="{{ section.id if section else 0 }}">
+                
+                <input type="email" name="customer_email" placeholder="Your Email" class="cyber-input" required>
+                
+                <div style="margin: 10px 0;">
+                    <label style="display: block; margin-bottom: 5px;">Upload Payment Receipt:</label>
+                    <input type="file" name="receipt" accept="image/*,.pdf,.doc,.docx" required 
+                           style="color: var(--neon-green); background: rgba(0, 0, 0, 0.8); border: 1px solid var(--neon-green); padding: 10px; width: 100%;">
+                </div>
+                
+                <button type="submit" class="cyber-button" style="width: 100%; margin-top: 15px;">
+                    Submit Receipt
+                </button>
+            </form>
+            
+            <div id="upload-result" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="{{ url_for('product_detail', product_id=product.id) }}" class="cyber-button">← Back to Product</a>
+    </div>
+</div>
+
+<script>
+document.getElementById('receipt-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(e.target);
+    const resultDiv = document.getElementById('upload-result');
+    resultDiv.innerHTML = '<p style="color: var(--neon-blue);">Uploading...</p>';
+    
+    try {
+        const response = await fetch('/upload_receipt', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            resultDiv.innerHTML = `
+                <p style="color: var(--neon-green);">
+                    ✓ Receipt uploaded successfully! We'll contact you shortly.
+                </p>
+            `;
+            e.target.reset();
+        } else {
+            resultDiv.innerHTML = `
+                <p style="color: var(--neon-pink);">
+                    ✗ Error: ${data.error}
+                </p>
+            `;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `
+            <p style="color: var(--neon-pink);">
+                ✗ Network error. Please try again.
+            </p>
+        `;
+    }
+});
+</script>
+{% endblock %}

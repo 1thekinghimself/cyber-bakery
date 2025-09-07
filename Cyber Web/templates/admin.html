@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-panel">
+    <h2 class="neon-glow" style="text-align: center;">Admin Control Panel</h2>
+    <p style="text-align: center;">Welcome, {{ session.admin_username }}!</p>
+
+    <!-- Site Settings -->
+    <div class="admin-section">
+        <h3>Site Settings</h3>
+        <form id="site-settings-form">
+            <input type="text" name="site_name" placeholder="Site Name" value="{{ site_settings.site_name if site_settings else '' }}" class="cyber-input" required>
+            <textarea name="site_description" placeholder="Site Description" class="cyber-input" required>{{ site_settings.site_description if site_settings else '' }}</textarea>
+            <button type="submit" class="cyber-button">Update Settings</button>
+        </form>
+    </div>
+
+    <!-- Products Management -->
+    <div class="admin-section">
+        <h3>Products</h3>
+        <form id="product-form">
+            <input type="text" name="name" placeholder="Product Name" class="cyber-input" required>
+            <textarea name="description" placeholder="Description" class="cyber-input" required></textarea>
+            <input type="text" name="image" placeholder="Image URL" class="cyber-input">
+            <input type="number" name="price" placeholder="Price" step="0.01" class="cyber-input" required>
+            <label style="color: var(--neon-green);">
+                <input type="checkbox" name="requires_access"> Requires Access Code
+            </label>
+            <button type="submit" class="cyber-button">Add Product</button>
+        </form>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Access Required</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.id }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.price }}</td>
+                    <td>{{ "Yes" if product.requires_access else "No" }}</td>
+                    <td class="action-buttons">
+                        <button onclick="deleteProduct({{ product.id }})" class="cyber-button" style="background: #ff3333; border-color: #ff3333;">Delete</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">No products found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Sections Management -->
+    <div class="admin-section">
+        <h3>Sections</h3>
+        <form id="section-form">
+            <select name="product_id" class="cyber-input" required>
+                <option value="">Select Product</option>
+                {% for product in products %}
+                <option value="{{ product.id }}">{{ product.name }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="name" placeholder="Section Name" class="cyber-input" required>
+            <input type="text" name="price_range" placeholder="Price Range" class="cyber-input" required>
+            <button type="submit" class="cyber-button">Add Section</button>
+        </form>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Product</th>
+                    <th>Name</th>
+                    <th>Price Range</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for section in sections %}
+                <tr>
+                    <td>{{ section.id }}</td>
+                    <td>
+                        {% for product in products %}
+                            {% if product.id == section.product_id %}
+                                {{ product.name }}
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ section.name }}</td>
+                    <td>{{ section.price_range }}</td>
+                    <td class="action-buttons">
+                        <button onclick="deleteSection({{ section.id }})" class="cyber-button" style="background: #ff3333; border-color: #ff3333;">Delete</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">No sections found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Access Codes Management -->
+    <div class="admin-section">
+        <h3>Access Codes</h3>
+        <form id="access-form">
+            <select name="product_id" class="cyber-input" required>
+                <option value="">Select Product</option>
+                {% for product in products %}
+                {% if product.requires_access %}
+                <option value="{{ product.id }}">{{ product.name }}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+            <input type="text" name="code" placeholder="Access Code" class="cyber-input" required>
+            <input type="text" name="description" placeholder="Description" class="cyber-input" required>
+            <button type="submit" class="cyber-button">Add Access Code</button>
+        </form>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Product</th>
+                    <th>Code</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for code in access_codes %}
+                <tr>
+                    <td>{{ code.id }}</td>
+                    <td>
+                        {% for product in products %}
+                            {% if product.id == code.product_id %}
+                                {{ product.name }}
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ code.code }}</td>
+                    <td>{{ code.description }}</td>
+                    <td class="action-buttons">
+                        <button onclick="deleteAccessCode({{ code.id }})" class="cyber-button" style="background: #ff3333; border-color: #ff3333;">Delete</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">No access codes found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Wallets Management -->
+    <div class="admin-section">
+        <h3>Payment Wallets</h3>
+        <form id="wallet-form">
+            <input type="text" name="name" placeholder="Wallet Name" class="cyber-input" required>
+            <input type="text" name="address" placeholder="Wallet Address" class="cyber-input" required>
+            <button type="submit" class="cyber-button">Add Wallet</button>
+        </form>
+
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wallet in wallets %}
+                <tr>
+                    <td>{{ wallet.id }}</td>
+                    <td>{{ wallet.name }}</td>
+                    <td style="word-break: break-all;">{{ wallet.address }}</td>
+                    <td>{{ "Active" if wallet.active else "Inactive" }}</td>
+                    <td class="action-buttons">
+                        <button onclick="toggleWallet({{ wallet.id }})" class="cyber-button">
+                            {{ "Deactivate" if wallet.active else "Activate" }}
+                        </button>
+                        <button onclick="deleteWallet({{ wallet.id }})" class="cyber-button" style="background: #ff3333; border-color: #ff3333;">Delete</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;">No wallets found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Analytics -->
+    <div class="admin-section">
+        <h3>Analytics</h3>
+        
+        <h4>Product Clicks ({{ click_logs|length }})</h4>
+        {% if click_logs %}
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>IP Address</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in click_logs|reverse %}
+                <tr>
+                    <td>{{ log.product_name if log.product_name else 'Unknown' }}</td>
+                    <td>{{ log.ip_address }}</td>
+                    <td>{{ log.timestamp }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No click data available</p>
+        {% endif %}
+
+        <h4 style="margin-top: 20px;">Payment Receipts ({{ receipts|length }})</h4>
+        {% if receipts %}
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Section</th>
+                    <th>Email</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for receipt in receipts|reverse %}
+                <tr>
+                    <td>{{ receipt.product_name if receipt.product_name else 'Unknown' }}</td>
+                    <td>{{ receipt.section_name if receipt.section_name else 'Unknown' }}</td>
+                    <td>{{ receipt.customer_email }}</td>
+                    <td>{{ receipt.timestamp }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No payment receipts available</p>
+        {% endif %}
+    </div>
+    
+    <!-- Uploaded Receipts -->
+    <div class="admin-section">
+        <h3>Uploaded Receipts</h3>
+        <h4>All Receipts ({{ receipts|length }})</h4>
+        {% if receipts %}
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Product</th>
+                    <th>Section</th>
+                    <th>Customer Email</th>
+                    <th>IP Address</th>
+                    <th>Timestamp</th>
+                    <th>File</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for receipt in receipts|reverse %}
+                <tr>
+                    <td>{{ receipt.id }}</td>
+                    <td>{{ receipt.product_name if receipt.product_name else 'Unknown' }}</td>
+                    <td>{{ receipt.section_name if receipt.section_name else 'Unknown' }}</td>
+                    <td>{{ receipt.customer_email }}</td>
+                    <td>{{ receipt.ip_address }}</td>
+                    <td>{{ receipt.timestamp }}</td>
+                    <td>
+                        {% if receipt.file_path %}
+                        <a href="{{ url_for('view_receipt', receipt_id=receipt.id) }}" 
+                           target="_blank" 
+                           class="cyber-button" 
+                           style="font-size: 0.8em; padding: 5px 10px;">
+                            View Receipt
+                        </a>
+                        {% else %}
+                        No file
+                        {% endif %}
+                    </td>
+                    <td class="action-buttons">
+                        <button onclick="downloadReceipt('{{ receipt.id }}')" class="cyber-button" style="font-size: 0.8em; padding: 5px 10px;">
+                            Download
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No receipts uploaded yet</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Admin JavaScript functions
+async function addProduct() {
+    const formData = new FormData(document.getElementById('product-form'));
+    const requiresAccess = document.querySelector('input[name="requires_access"]').checked;
+    formData.append('requires_access', requiresAccess ? '1' : '0');
+
+    const response = await fetch('/admin/add_product', { 
+        method: 'POST', 
+        body: formData 
+    });
+    const data = await response.json();
+
+    if (data.success) {
+        alert('Product added successfully!');
+        location.reload();
+    } else {
+        alert('Error: ' + data.error);
+    }
+}
+
+async function deleteProduct(id) {
+    if (confirm('Are you sure you want to delete this product?')) {
+        const response = await fetch(`/admin/delete_product/${id}`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (data.success) location.reload();
+        else alert('Error: ' + data.error);
+    }
+}
+
+async function addSection() {
+    const formData = new FormData(document.getElementById('section-form'));
+    const response = await fetch('/admin/add_section', { 
+        method: 'POST', 
+        body: formData 
+    });
+    const data = await response.json();
+
+    if (data.success) {
+        alert('Section added successfully!');
+        location.reload();
+    } else {
+        alert('Error: ' + data.error);
+    }
+}
+
+async function deleteSection(id) {
+    if (confirm('Are you sure you want to delete this section?')) {
+        const response = await fetch(`/admin/delete_section/${id}`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (data.success) location.reload();
+        else alert('Error: ' + data.error);
+    }
+}
+
+async function addAccessCode() {
+    const formData = new FormData(document.getElementById('access-form'));
+    const response = await fetch('/admin/add_access_code', { 
+        method: 'POST', 
+        body: formData 
+    });
+    const data = await response.json();
+
+    if (data.success) {
+        alert('Access code added successfully!');
+        location.reload();
+    } else {
+        alert('Error: ' + data.error);
+    }
+}
+
+async function deleteAccessCode(id) {
+    if (confirm('Are you sure you want to delete this access code?')) {
+        const response = await fetch(`/admin/delete_access_code/${id}`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (data.success) location.reload();
+        else alert('Error: ' + data.error);
+    }
+}
+
+async function addWallet() {
+    const formData = new FormData(document.getElementById('wallet-form'));
+    const response = await fetch('/admin/add_wallet', { 
+        method: 'POST', 
+        body: formData 
+    });
+    const data = await response.json();
+
+    if (data.success) {
+        alert('Wallet added successfully!');
+        location.reload();
+    } else {
+        alert('Error: ' + data.error);
+    }
+}
+
+async function deleteWallet(id) {
+    if (confirm('Are you sure you want to delete this wallet?')) {
+        const response = await fetch(`/admin/delete_wallet/${id}`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (data.success) location.reload();
+        else alert('Error: ' + data.error);
+    }
+}
+
+async function toggleWallet(id) {
+    const response = await fetch(`/admin/toggle_wallet/${id}`, { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    const data = await response.json();
+    if (data.success) location.reload();
+    else alert('Error: ' + data.error);
+}
+
+async function updateSettings() {
+    const formData = new FormData(document.getElementById('site-settings-form'));
+    const response = await fetch('/admin/update_settings', { 
+        method: 'POST', 
+        body: formData 
+    });
+    const data = await response.json();
+
+    if (data.success) {
+        alert('Settings updated successfully!');
+        location.reload();
+    } else {
+        alert('Error: ' + data.error);
+    }
+}
+
+async function downloadReceipt(receiptId) {
+    try {
+        const response = await fetch(`/admin/view_receipt/${receiptId}`);
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `receipt-${receiptId}.${blob.type.split('/')[1] || 'file'}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } else {
+            alert('Error downloading receipt');
+        }
+    } catch (error) {
+        alert('Error downloading receipt: ' + error.message);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Form event listeners
+    const productForm = document.getElementById('product-form');
+    const sectionForm = document.getElementById('section-form');
+    const accessForm = document.getElementById('access-form');
+    const walletForm = document.getElementById('wallet-form');
+    const settingsForm = document.getElementById('site-settings-form');
+
+    if (productForm) {
+        productForm.addEventListener('submit', (e) => { e.preventDefault(); addProduct(); });
+    }
+    if (sectionForm) {
+        sectionForm.addEventListener('submit', (e) => { e.preventDefault(); addSection(); });
+    }
+    if (accessForm) {
+        accessForm.addEventListener('submit', (e) => { e.preventDefault(); addAccessCode(); });
+    }
+    if (walletForm) {
+        walletForm.addEventListener('submit', (e) => { e.preventDefault(); addWallet(); });
+    }
+    if (settingsForm) {
+        settingsForm.addEventListener('submit', (e) => { e.preventDefault(); updateSettings(); });
+    }
+});
+</script>
+{% endblock %}
